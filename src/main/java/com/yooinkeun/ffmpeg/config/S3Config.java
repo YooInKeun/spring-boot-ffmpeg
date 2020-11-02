@@ -11,7 +11,6 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 import java.nio.file.Path;
 
@@ -26,17 +25,20 @@ public class S3Config {
     @Value("${s3.bucket.base-path}")
     private Path basePath;
 
-    @Primary
+    @Value("${s3.bucket.access-key}")
+    private String accessKey;
+
+    @Value("${s3.bucket.password}")
+    private String password;
+
     @Bean
     public AmazonS3 amazonS3Client() {
-
-        // accessKey, secretKey는 인스턴스 내부에서 관리하는 게 좋음
-        final AWSCredentials credentials = new BasicAWSCredentials("", "");
+        final AWSCredentials credentials = new BasicAWSCredentials(accessKey, password);
 
         return AmazonS3ClientBuilder
                 .standard()
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withRegion(Regions.fromName(""))
+                .withRegion(Regions.fromName("ap-northeast-2"))
                 .build();
     }
 }

@@ -12,3 +12,5 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+application-s3-config.yml

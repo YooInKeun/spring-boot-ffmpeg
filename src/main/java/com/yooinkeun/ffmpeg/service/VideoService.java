@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Slf4j
@@ -28,30 +30,35 @@ public class VideoService {
     private final AmazonS3 amazonS3;
 
     @Transactional
-    public String upload(MultipartFile file) throws IOException {
+    public String upload(MultipartFile multipartFile) throws IOException {
         String uuid = UUID.randomUUID().toString();
         Path basePath = s3Config.getBasePath();
-        String key = basePath.resolve(uuid).resolve(file.getOriginalFilename()).toString();
+        String key = basePath.resolve(uuid).resolve(multipartFile.getOriginalFilename()).toString();
 
         PutObjectRequest putObjectRequest = new PutObjectRequest(
                 s3Config.getBucketName(),
                 key,
-                file.getInputStream(),
-                makeMetaData(file))
+                multipartFile.getInputStream(),
+                makeMetaData(multipartFile))
                 .withCannedAcl(CannedAccessControlList.PublicRead);
 
         amazonS3.putObject(putObjectRequest);
         String fileUrl = amazonS3.getUrl(s3Config.getBucketName(), key).toString();
-        logVideoPlayTile(fileUrl);
+
+        File file = new File(multipartFile.getOriginalFilename());
+        multipartFile.transferTo(file);
+        logVideoPlayTime(Paths.get(fileUrl));
         return fileUrl;
     }
 
-    private void logVideoPlayTile(String fileUrl) {
+    private void logVideoPlayTime(Path fileUrl) {
         try {
-            FFprobe ffprobe = new FFprobe(fileUrl);  //리눅스에 설치되어 있는 ffmpeg 폴더
-            FFmpegProbeResult probeResult = ffprobe.probe("");
+            String fullUrl = fileUrl.getParent() + "/" + fileUrl.getFileName();
+
+            FFprobe ffprobe = new FFprobe("/DATA/ffmpeg/ffprobe");
+            FFmpegProbeResult probeResult = ffprobe.probe(fullUrl);
             FFmpegFormat format = probeResult.getFormat();
-            log.info(Double.toString(format.duration));    //초단위
+            log.info(Double.toString(format.duration)); // 초단위
         } catch(IOException e) {
             log.error("error", e);
         }

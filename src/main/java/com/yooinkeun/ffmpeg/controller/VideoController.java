@@ -16,6 +16,6 @@ public class VideoController {
 
     @PostMapping("/api/video/upload")
     public String upload(MultipartFile file) throws IOException {
-        return videoService.upload(file);
+        return videoService.uploadVideo(file);
     }
 }

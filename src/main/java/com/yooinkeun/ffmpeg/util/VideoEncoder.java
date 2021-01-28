@@ -85,4 +85,16 @@ public class VideoEncoder {
         FFmpegStream ffmpegStream = ffmpegProbeResult.getStreams().get(frameIndex);
         return new Dimension(ffmpegStream.width, ffmpegStream.height);
     }
+    
+    /**
+     * 동영상 재생 시간 구하기
+     * @param videoFile
+     * @return
+     * @throws IOException
+     */
+    public int getPlayTime(File videoFile) throws IOException {
+        FFmpegProbeResult ffmpegProbeResult = ffprobe.probe(videoFile.getAbsolutePath());
+        FFmpegFormat format = ffmpegProbeResult.getFormat();
+        return (int) format.duration;
+    }
 }

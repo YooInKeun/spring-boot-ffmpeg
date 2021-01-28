@@ -76,4 +76,13 @@ public class VideoEncoder {
 
         executor.createJob(builder).run();
     }
+    
+    /**
+     * 프레임의 파일 크기(너비, 높이) 구하기
+     */
+    public Dimension getDimension(File videoFile, int frameIndex) throws IOException {
+        FFmpegProbeResult ffmpegProbeResult = ffprobe.probe(videoFile.getAbsolutePath());
+        FFmpegStream ffmpegStream = ffmpegProbeResult.getStreams().get(frameIndex);
+        return new Dimension(ffmpegStream.width, ffmpegStream.height);
+    }
 }

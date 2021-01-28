@@ -53,4 +53,27 @@ public class VideoEncoder {
 
         executor.createJob(builder).run();
     }
+    
+    /**
+     * 비디오 썸네일 생성, playTime 단위는 second(초)
+     * @param videoFile
+     * @param thumbnailFilePath
+     * @param playTime
+     */
+    public void makeThumbnail(File videoFile, String thumbnailFilePath, Dimension dimension, long playTime) {
+        int width = dimension.width % 2 == 0 ? dimension.width : dimension.width + 1;
+        int height = dimension.height % 2 == 0 ? dimension.height : dimension.height + 1;
+
+        FFmpegBuilder builder = new FFmpegBuilder()
+                .overrideOutputFiles(true)
+                .setInput(videoFile.getAbsolutePath())
+                .addOutput(thumbnailFilePath)
+                .addExtraArgs("-t", String.valueOf(playTime))
+                .setFormat("mp4")
+                .setVideoCodec("libx264")
+                .setVideoResolution(width, height)
+                .done();
+
+        executor.createJob(builder).run();
+    }
 }
